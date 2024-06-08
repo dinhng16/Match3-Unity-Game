@@ -11,6 +11,7 @@ public class Item
 
     public Transform View { get; private set; }
 
+    private string _prefabName;
 
     public virtual void SetView()
     {
@@ -18,11 +19,16 @@ public class Item
 
         if (!string.IsNullOrEmpty(prefabname))
         {
-            GameObject prefab = Resources.Load<GameObject>(prefabname);
-            if (prefab)
-            {
-                View = GameObject.Instantiate(prefab).transform;
-            }
+            var gameObject = GameObjectProvider.Instance.GetOrCreateGameObjectByName(prefabname);
+            View = gameObject.transform;
+            View.localScale = Vector3.one;
+            _prefabName = prefabname;
+
+            // GameObject prefab = Resources.Load<GameObject>(prefabname);
+            // if (prefab)
+            // {
+            //     View = GameObject.Instantiate(prefab).transform;
+            // }
         }
     }
 
@@ -101,7 +107,8 @@ public class Item
             View.DOScale(0.1f, 0.1f).OnComplete(
                 () =>
                 {
-                    GameObject.Destroy(View.gameObject);
+                    // GameObject.Destroy(View.gameObject);
+                    GameObjectProvider.Instance.SendBackToPool(_prefabName, View.gameObject);
                     View = null;
                 }
                 );
