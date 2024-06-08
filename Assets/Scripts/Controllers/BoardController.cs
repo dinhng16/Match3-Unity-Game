@@ -70,7 +70,7 @@ public class BoardController : MonoBehaviour
     }
 
 
-    public void Update()
+    private void Update()
     {
         if (m_gameOver) return;
         if (IsBusy) return;
