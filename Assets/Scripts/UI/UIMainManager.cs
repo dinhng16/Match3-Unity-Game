@@ -30,6 +30,12 @@ public class UIMainManager : MonoBehaviour
         m_gameManager.SetState(GameManager.eStateGame.MAIN_MENU);
     }
 
+    internal void RestartLevel()
+    {
+        m_gameManager.ClearLevel();
+        m_gameManager.LoadLevel(_lastLevel);
+    }
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -104,14 +110,17 @@ public class UIMainManager : MonoBehaviour
         m_gameManager.SetState(GameManager.eStateGame.PAUSE);
     }
 
+    private GameManager.eLevelMode _lastLevel;
     internal void LoadLevelMoves()
     {
         m_gameManager.LoadLevel(GameManager.eLevelMode.MOVES);
+        _lastLevel = GameManager.eLevelMode.MOVES;
     }
 
     internal void LoadLevelTimer()
     {
         m_gameManager.LoadLevel(GameManager.eLevelMode.TIMER);
+        _lastLevel = GameManager.eLevelMode.TIMER;
     }
 
     internal void ShowGameMenu()
