@@ -147,7 +147,16 @@ public class Board
 
                 NormalItem item = new NormalItem();
 
-                item.SetType(Utils.GetRandomNormalType());
+                // item.SetType(Utils.GetRandomNormalType());
+
+                var except = new List<NormalItem.eNormalType>();
+                EvaluateItemForExceptArr(cell.NeighbourUp, except);
+                EvaluateItemForExceptArr(cell.NeighbourBottom, except);
+                EvaluateItemForExceptArr(cell.NeighbourRight, except);
+                EvaluateItemForExceptArr(cell.NeighbourLeft, except);
+                
+                var type = Utils.GetRandomNormalTypeExcept(except.ToArray());
+                item.SetType(type);
                 item.SetView();
                 item.SetViewRoot(m_root);
 
@@ -157,6 +166,17 @@ public class Board
         }
     }
 
+    private void EvaluateItemForExceptArr(Cell candidateCell, List<NormalItem.eNormalType> exceptArr)
+    {
+        if (candidateCell == null) return;
+        
+        var item = candidateCell.Item;
+        if (item is NormalItem normalItem)
+        {
+            exceptArr.Add(normalItem.ItemType);
+        }
+    }
+    
     internal void ExplodeAllItems()
     {
         for (int x = 0; x < boardSizeX; x++)
