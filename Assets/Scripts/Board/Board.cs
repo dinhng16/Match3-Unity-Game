@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Random = System.Random;
 
 public class Board
 {
@@ -138,6 +139,24 @@ public class Board
 
     internal void FillGapsWithNewItems()
     {
+        // buildup count
+        Dictionary<NormalItem.eNormalType, int> typeCount = new Dictionary<NormalItem.eNormalType, int>();
+        for (int x = 0; x < boardSizeX; x++)
+        {
+            for (int y = 0; y < boardSizeY; y++)
+            {
+                Cell cell = m_cells[x, y];
+                if (!cell.IsEmpty && cell.Item is NormalItem normalItem)
+                {
+                    if (typeCount.ContainsKey(normalItem.ItemType))
+                        typeCount[normalItem.ItemType] += 1;
+                    else 
+                        typeCount.Add(normalItem.ItemType, 1);
+                }
+            }
+        }
+
+
         for (int x = 0; x < boardSizeX; x++)
         {
             for (int y = 0; y < boardSizeY; y++)
@@ -154,8 +173,28 @@ public class Board
                 EvaluateItemForExceptArr(cell.NeighbourBottom, except);
                 EvaluateItemForExceptArr(cell.NeighbourRight, except);
                 EvaluateItemForExceptArr(cell.NeighbourLeft, except);
+
+                var candidates = Enum.GetValues(typeof(NormalItem.eNormalType)).Cast<NormalItem.eNormalType>().Except(except).ToList();
                 
-                var type = Utils.GetRandomNormalTypeExcept(except.ToArray());
+                // sort from lowest occurence to highest
+                // then random to ensure it's a fair game between the cell having the same occurence
+                var typeSorted = typeCount.ToList()
+                    .OrderBy(kvp => kvp.Value)
+                    .ThenBy(kvp => UnityEngine.Random.Range(0f, 1f))
+                    .ToList();
+                
+                NormalItem.eNormalType type = candidates[0];
+                for (int i = 0; i < typeSorted.Count; i += 1)
+                {
+                    var kvp = typeSorted[i];
+                    if (candidates.Exists(k => k == kvp.Key))
+                    {
+                        type = kvp.Key;
+                        break;
+                    }
+                }
+                
+                typeCount[type] += 1;
                 item.SetType(type);
                 item.SetView();
                 item.SetViewRoot(m_root);
